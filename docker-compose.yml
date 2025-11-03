@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  randomcoffee_bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: randomcoffee_bot
+    restart: always  # Автоматический перезапуск при сбоях
+    environment:
+      - TZ=Europe/Moscow  # Установка временной зоны
+    volumes:
+      - ./data:/app/data  # Монтирование папки для данных (например, базы данных)
+      - ./config.yaml:/app/config.yaml  # Конфигурационный файл
+      - ./random_coffee.db:/app/random_coffee.db  # База данных
+    networks:
+      - bot_network
+
+networks:
+  bot_network:
+    driver: bridge
