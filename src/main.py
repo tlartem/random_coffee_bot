@@ -5,9 +5,9 @@ import sys
 from aiogram import Dispatcher
 
 from shared.logger import configure_logging
-from src.adapter import database, telegram
+from src.adapter import telegram
 from src.controller.scheduler import schedule_tasks, setup_scheduler
-from src.controller.tg_handlers import router
+from src.controller.telegram_callback import router
 
 log = logging.getLogger(__name__)
 
@@ -20,7 +20,15 @@ async def on_startup():
             admin_notify_func=telegram.send_message_to_admin,
         )
 
-        await database.create_tables()
+        from aiogram.types import BotCommand, BotCommandScopeAllPrivateChats
+
+        await telegram.bot.set_my_commands(
+            [
+                BotCommand(command="groups", description="Список групп"),
+            ],
+            scope=BotCommandScopeAllPrivateChats(),
+        )
+
         await setup_scheduler()
         await schedule_tasks()
 
@@ -35,7 +43,7 @@ async def main():
     dp.startup.register(on_startup)
 
     log.info("Запуск бота...")
-    await dp.start_polling(telegram.get_bot(), skip_updates=True)
+    await dp.start_polling(telegram.bot, skip_updates=True)
 
 
 if __name__ == "__main__":

@@ -25,7 +25,7 @@ async def create_batch(session: AsyncSession, pairs: t.Sequence[model.Pair]) -> 
 
 
 async def get_available_pairs(
-    session: AsyncSession,
+    session: AsyncSession, group_id: int
 ) -> t.Sequence[tuple[model.Participant, model.Participant]]:
     p1, p2 = aliased(model.Participant), aliased(model.Participant)
     existing = (
@@ -39,10 +39,12 @@ async def get_available_pairs(
         .exists()
     )
     stmt = (
-        select(p1.user_id, p2.user_id, p1.username, p2.username)
+        select(p1, p2)
+        .where(p1.group_id == group_id)
+        .where(p2.group_id == group_id)
         .where(p1.user_id < p2.user_id)
         .where(~existing)
         .order_by(func.random())
     )
     res = await session.execute(stmt)
-    return res.scalars().all()
+    return res.all()

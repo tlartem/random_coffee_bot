@@ -13,11 +13,25 @@ async def create_or_update(
     await session.commit()
 
 
-async def get_all(session: AsyncSession) -> t.Sequence[model.Participant]:
-    res = await session.scalars(select(model.Participant))
+async def get_all(session: AsyncSession, group_id: int) -> t.Sequence[model.Participant]:
+    res = await session.scalars(
+        select(model.Participant).where(model.Participant.group_id == group_id)
+    )
     return res.all()
 
 
-async def clear_all(session: AsyncSession) -> None:
-    await session.execute(delete(model.Participant))
+async def clear_all(session: AsyncSession, group_id: int) -> None:
+    await session.execute(
+        delete(model.Participant).where(model.Participant.group_id == group_id)
+    )
+    await session.commit()
+
+
+async def delete_by_user_id(session: AsyncSession, group_id: int, user_id: int) -> None:
+    await session.execute(
+        delete(model.Participant).where(
+            model.Participant.group_id == group_id,
+            model.Participant.user_id == user_id,
+        )
+    )
     await session.commit()

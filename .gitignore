@@ -24,3 +24,5 @@ build/
 # Исключаем операционные файлы
 .env
 .env.local
+
+random_coffee.db
