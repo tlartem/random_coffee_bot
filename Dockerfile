@@ -1,17 +1,19 @@
 # Базовый образ Python
-FROM python:3.10-slim
+FROM python:3.13-slim
 
-# Установка рабочей директории
 WORKDIR /app
 
-# Копирование зависимостей
-COPY requirements.txt .
+# Установка uv для управления зависимостями
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+
+# Копирование файлов проекта
+COPY pyproject.toml uv.lock ./
 
 # Установка зависимостей
-RUN pip install --no-cache-dir -r requirements.txt
+RUN uv sync --frozen --no-dev
 
 # Копирование исходного кода
 COPY . .
 
 # Команда для запуска бота
-CMD ["python", "main.py"]
+CMD ["uv", "run", "python", "-m", "src.main"]
